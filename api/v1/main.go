@@ -3,9 +3,9 @@ package main
 import (
 	"os"
 
-	_ "github.com/JonathanGzzBen/ingenialists/api/v1/docs"
-	"github.com/JonathanGzzBen/ingenialists/api/v1/repository"
-	"github.com/JonathanGzzBen/ingenialists/api/v1/server"
+	_ "github.com/JonathanGzzBen/nutrity-api/api/v1/docs"
+	"github.com/JonathanGzzBen/nutrity-api/api/v1/repository"
+	"github.com/JonathanGzzBen/nutrity-api/api/v1/server"
 	"github.com/joho/godotenv"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/endpoints"
@@ -50,9 +50,7 @@ func main() {
 			RedirectURL:  "http://127.0.0.1:8080/v1/auth/google-callback",
 			Scopes:       []string{"openid", "profile", "email"},
 		},
-		CategoriesRepo: repository.NewCategoriesGormRepository(db),
-		UsersRepo:      repository.NewUsersGormRepository(db),
-		ArticlesRepo:   repository.NewArticlesGormRepository(db),
+		UsersRepo: repository.NewUsersGormRepository(db),
 	}
 	// hostname is used by multiple controllers
 	// to make requests to authentication controller

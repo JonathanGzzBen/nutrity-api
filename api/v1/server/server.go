@@ -1,38 +1,32 @@
 package server
 
 import (
-	"github.com/JonathanGzzBen/ingenialists/api/v1/repository"
+	"github.com/JonathanGzzBen/nutrity-api/api/v1/repository"
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
 
 type Server struct {
-	googleClient   IGoogleClient
-	googleConfig   IOauthConfig
-	development    bool
-	Router         *gin.Engine
-	CategoriesRepo repository.CategoriesRepository
-	UsersRepo      repository.UsersRepository
-	ArticlesRepo   repository.ArticlesRepository
+	googleClient IGoogleClient
+	googleConfig IOauthConfig
+	development  bool
+	Router       *gin.Engine
+	UsersRepo    repository.UsersRepository
 }
 
 type ServerConfig struct {
-	GoogleConfig   IOauthConfig
-	Hostname       string
-	Development    bool
-	CategoriesRepo repository.CategoriesRepository
-	UsersRepo      repository.UsersRepository
-	ArticlesRepo   repository.ArticlesRepository
+	GoogleConfig IOauthConfig
+	Hostname     string
+	Development  bool
+	UsersRepo    repository.UsersRepository
 }
 
 func NewServer(sc ServerConfig) *Server {
 	server := &Server{
-		googleConfig:   sc.GoogleConfig,
-		development:    sc.Development,
-		CategoriesRepo: sc.CategoriesRepo,
-		UsersRepo:      sc.UsersRepo,
-		ArticlesRepo:   sc.ArticlesRepo,
+		googleConfig: sc.GoogleConfig,
+		development:  sc.Development,
+		UsersRepo:    sc.UsersRepo,
 	}
 	if sc.Development {
 		server.googleClient = &GoogleClientMock{}
@@ -57,22 +51,6 @@ func NewServer(sc ServerConfig) *Server {
 			if sc.Development {
 				ar.GET("/dev-authorize", server.devOAuthAuthorize)
 			}
-		}
-		cr := v1.Group("/categories")
-		{
-			cr.GET("/", server.GetAllCategories)
-			cr.GET("/:id", server.GetCategory)
-			cr.POST("/", server.CreateCategory)
-			cr.PUT("/:id", server.UpdateCategory)
-			cr.DELETE("/:id", server.DeleteCategory)
-		}
-		arr := v1.Group("/articles")
-		{
-			arr.GET("/", server.GetAllArticles)
-			arr.GET("/:id", server.GetArticle)
-			arr.POST("/", server.CreateArticle)
-			arr.PUT("/:id", server.UpdateArticle)
-			arr.DELETE("/:id", server.DeleteArticle)
 		}
 	}
 

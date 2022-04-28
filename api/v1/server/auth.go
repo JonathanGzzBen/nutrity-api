@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/JonathanGzzBen/ingenialists/api/v1/models"
+	"github.com/JonathanGzzBen/nutrity-api/api/v1/models"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
 )

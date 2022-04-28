@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/JonathanGzzBen/ingenialists/api/v1/models"
-	"github.com/JonathanGzzBen/ingenialists/api/v1/repository"
+	"github.com/JonathanGzzBen/nutrity-api/api/v1/models"
+	"github.com/JonathanGzzBen/nutrity-api/api/v1/repository"
 	"github.com/gin-gonic/gin"
 )
 

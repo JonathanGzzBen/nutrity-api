@@ -1,8 +1,18 @@
 package repository
 
 import (
-	"github.com/JonathanGzzBen/ingenialists/api/v1/models"
+	"errors"
+
+	"github.com/JonathanGzzBen/nutrity-api/api/v1/models"
 	"gorm.io/gorm"
+)
+
+var (
+	ErrCouldNotRetrieve = errors.New("could not retrieve records")
+	ErrNotFound         = errors.New("record not found")
+	ErrCouldNotCreate   = errors.New("could not insert record")
+	ErrCouldNotUpdate   = errors.New("could not update record")
+	ErrCouldNotDelete   = errors.New("could not delete record")
 )
 
 type UsersRepository interface {

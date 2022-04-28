@@ -8,9 +8,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/JonathanGzzBen/ingenialists/api/v1/models"
-	"github.com/JonathanGzzBen/ingenialists/api/v1/repository/mocks"
-	"github.com/JonathanGzzBen/ingenialists/api/v1/server"
+	"github.com/JonathanGzzBen/nutrity-api/api/v1/models"
+	"github.com/JonathanGzzBen/nutrity-api/api/v1/repository/mocks"
+	"github.com/JonathanGzzBen/nutrity-api/api/v1/server"
 )
 
 var mockUsers = []models.User{
@@ -28,8 +28,8 @@ func TestGetAllUsers(t *testing.T) {
 		s.UsersRepo.CreateUser(&u)
 	}
 
-	mockUsersRepo := &mocks.UsersRepository{}
-	mockUsersRepo.On("GetAllUsers").Return(mockUsers, nil)
+	mockUsersRepo := &mocks.MockUsersRepository{}
+	mockUsersRepo.EXPECT().GetAllUsers().Return(mockUsers, nil)
 	s.UsersRepo = mockUsersRepo
 
 	res, err := http.Get(fmt.Sprintf("%s/v1/users", ts.URL))
@@ -65,8 +65,8 @@ func TestGetUser(t *testing.T) {
 
 	uToGet := mockUsers[1]
 
-	mockUsersRepo := &mocks.UsersRepository{}
-	mockUsersRepo.On("GetUser", uToGet.ID).Return(&uToGet, nil)
+	mockUsersRepo := &mocks.MockUsersRepository{}
+	mockUsersRepo.EXPECT().GetUser(uToGet.ID).Return(&uToGet, nil)
 	s.UsersRepo = mockUsersRepo
 
 	res, err := http.Get(fmt.Sprintf("%s/v1/users/%d", ts.URL, uToGet.ID))
@@ -104,9 +104,9 @@ func TestUpdateUserChangeNameAsAdministratorReturnOkDontMakeChanges(t *testing.T
 	uUpdated := uToUpdate
 	uUpdated.Name = "User Updated"
 
-	mockUsersRepo := &mocks.UsersRepository{}
-	mockUsersRepo.On("GetUser", uToUpdate.ID).Return(&uToUpdate, nil)
-	mockUsersRepo.On("UpdateUser", &uToUpdate).Return(&uToUpdate, nil)
+	mockUsersRepo := &mocks.MockUsersRepository{}
+	mockUsersRepo.EXPECT().GetUser(uToUpdate.ID).Return(&uToUpdate, nil)
+	mockUsersRepo.EXPECT().UpdateUser(&uToUpdate).Return(&uToUpdate, nil)
 	s.UsersRepo = mockUsersRepo
 
 	muJSONBytes, err := json.Marshal(uUpdated)
@@ -154,9 +154,9 @@ func TestUpdateUserChangeRoleAsAdministratorReturnOk(t *testing.T) {
 	uUpdated := uToUpdate
 	uUpdated.Role = models.RoleAdministrator
 
-	mockUsersRepo := &mocks.UsersRepository{}
-	mockUsersRepo.On("GetUser", uToUpdate.ID).Return(&uToUpdate, nil)
-	mockUsersRepo.On("UpdateUser", &uUpdated).Return(&uUpdated, nil)
+	mockUsersRepo := &mocks.MockUsersRepository{}
+	mockUsersRepo.EXPECT().GetUser(uToUpdate.ID).Return(&uToUpdate, nil)
+	mockUsersRepo.EXPECT().UpdateUser(&uUpdated).Return(&uUpdated, nil)
 	s.UsersRepo = mockUsersRepo
 
 	muJSONBytes, err := json.Marshal(uUpdated)
@@ -210,7 +210,7 @@ func TestUpdateUserChangeNameAsDifferentUserReturnForbidden(t *testing.T) {
 	uUpdated := uToUpdate
 	uUpdated.Name = "Updated name"
 
-	s.UsersRepo = &mocks.UsersRepository{}
+	s.UsersRepo = &mocks.MockUsersRepository{}
 
 	muJSONBytes, err := json.Marshal(uUpdated)
 	if err != nil {
@@ -253,9 +253,9 @@ func TestUpdateUserChangeNameAsSameUserReturnOk(t *testing.T) {
 	uUpdated := uToUpdate
 	uUpdated.Name = "Updated name"
 
-	mockUsersRepo := &mocks.UsersRepository{}
-	mockUsersRepo.On("GetUser", uToUpdate.ID).Return(&uToUpdate, nil)
-	mockUsersRepo.On("UpdateUser", &uUpdated).Return(&uUpdated, nil)
+	mockUsersRepo := &mocks.MockUsersRepository{}
+	mockUsersRepo.EXPECT().GetUser(uToUpdate.ID).Return(&uToUpdate, nil)
+	mockUsersRepo.EXPECT().UpdateUser(&uUpdated).Return(&uUpdated, nil)
 	s.UsersRepo = mockUsersRepo
 
 	muJSONBytes, err := json.Marshal(uUpdated)
