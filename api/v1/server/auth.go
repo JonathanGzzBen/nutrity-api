@@ -2,6 +2,8 @@ package server
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"net/http"
 	"net/url"
 
@@ -11,14 +13,28 @@ import (
 )
 
 var (
-	state             = "ingenialists"
+	state             = "nutrity-api"
 	googleUserInfoURL = "https://www.googleapis.com/oauth2/v3/userinfo"
 	AccessTokenName   = "AccessToken"
+	TokenLength       = 40
 )
 
 type IOauthConfig interface {
 	AuthCodeURL(string, ...oauth2.AuthCodeOption) string
 	Exchange(context.Context, string, ...oauth2.AuthCodeOption) (*oauth2.Token, error)
+}
+
+func generateSecureToken(length int) string {
+	b := make([]byte, length)
+	if _, err := rand.Read(b); err != nil {
+		return ""
+	}
+	return hex.EncodeToString(b)
+}
+
+type tokenResponse struct {
+	AccessToken string `json:"AccessToken"`
+	TokenType   string `json:"TokenType"`
 }
 
 // CurrentUser is the handler for GET requests to /auth
@@ -69,41 +85,34 @@ func (s *Server) GoogleCallback(c *gin.Context) {
 		return
 	}
 
-	_, err = s.UsersRepo.GetUserByGoogleSub(uinfo.Sub)
+	u, err := s.UsersRepo.GetUserByGoogleSub(uinfo.Sub)
+	tokenResponse := tokenResponse{
+		TokenType: "Bearer",
+	}
+	if u != nil {
+		tokenResponse.AccessToken = u.AccessToken
+	}
 	if err != nil {
 		u := &models.User{
 			GoogleSub:         uinfo.Sub,
 			ProfilePictureURL: uinfo.Picture,
 			Name:              uinfo.Name,
+			AccessToken:       tokenResponse.AccessToken,
 		}
 		s.UsersRepo.CreateUser(u)
 	}
 
-	c.JSON(http.StatusOK, token)
+	c.JSON(http.StatusOK, tokenResponse)
 }
 
 func (s *Server) userByAccessToken(at string) (*models.User, error) {
-	ui, err := s.googleClient.userInfoByAccessToken(at)
-	if err != nil {
-		return nil, err
-	}
-	if s.development {
-		var role models.Role
-		switch at {
-		case "Administrator":
-			role = models.RoleAdministrator
-		case "Writer":
-			role = models.RoleWriter
-		default:
-			role = models.RoleReader
+	users, err := s.UsersRepo.GetAllUsers()
+	for _, u := range users {
+		if u.AccessToken == at {
+			return &u, nil
 		}
-		return &models.User{ID: 1, GoogleSub: ui.Sub, Name: ui.Name, Role: role}, nil
 	}
-	u, err := s.UsersRepo.GetUserByGoogleSub(ui.Sub)
-	if err != nil {
-		return nil, err
-	}
-	return u, nil
+	return nil, err
 }
 
 // devOAuthAuthorize handles requests to /auth/authorize

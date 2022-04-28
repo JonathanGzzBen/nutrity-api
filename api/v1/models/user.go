@@ -14,6 +14,7 @@ type User struct {
 	Description       string    `json:"description"`
 	ShortDescription  string    `json:"shortDescription"`
 	Role              Role      `json:"role" example:"Reader"`
+	AccessToken       string    `json:"-"`
 }
 
 type Role string
