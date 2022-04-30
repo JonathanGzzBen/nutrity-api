@@ -40,7 +40,7 @@ type tokenResponse struct {
 // CurrentUser is the handler for GET requests to /auth
 // 	@ID GetCurrentUser
 // 	@Tags auth
-// 	@Success 200 {object} string
+// 	@Success 200 {object} UserDTO
 // 	@Failure 403 {object} models.APIError
 // 	@Security AccessToken
 // 	@Router /auth [get]
@@ -51,7 +51,7 @@ func (s *Server) GetCurrentUser(c *gin.Context) {
 		c.JSON(http.StatusForbidden, models.APIError{Code: http.StatusForbidden, Message: "invalid access token"})
 		return
 	}
-	c.JSON(http.StatusOK, u)
+	c.JSON(http.StatusOK, userDTOFromUser(u))
 }
 
 // LoginGoogle is the handler for GET requests to /auth/google-login
@@ -94,10 +94,10 @@ func (s *Server) GoogleCallback(c *gin.Context) {
 	}
 	if err != nil {
 		u := &models.User{
-			GoogleSub:         uinfo.Sub,
-			ProfilePictureURL: uinfo.Picture,
-			Name:              uinfo.Name,
-			AccessToken:       tokenResponse.AccessToken,
+			GoogleSub:   uinfo.Sub,
+			AccessToken: generateSecureToken(TokenLength),
+			Username:    uinfo.Name,
+			Email:       uinfo.Email,
 		}
 		s.UsersRepo.CreateUser(u)
 	}
@@ -106,13 +106,11 @@ func (s *Server) GoogleCallback(c *gin.Context) {
 }
 
 func (s *Server) userByAccessToken(at string) (*models.User, error) {
-	users, err := s.UsersRepo.GetAllUsers()
-	for _, u := range users {
-		if u.AccessToken == at {
-			return &u, nil
-		}
+	u, err := s.UsersRepo.GetUserByAccessToken(at)
+	if err != nil {
+		return nil, err
 	}
-	return nil, err
+	return u, nil
 }
 
 // devOAuthAuthorize handles requests to /auth/authorize

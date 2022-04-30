@@ -1,20 +1,22 @@
 package models
 
-import (
-	"time"
-)
-
 type User struct {
-	ID                uint      `json:"id,omitempty"`
-	GoogleSub         string    `json:"-"`
-	Name              string    `json:"name"`
-	Birthdate         time.Time `json:"birthdate" example:"2006-01-02T15:04:05Z"`
-	Gender            string    `json:"gender"`
-	ProfilePictureURL string    `json:"profilePictureUrl"`
-	Description       string    `json:"description"`
-	ShortDescription  string    `json:"shortDescription"`
-	Role              Role      `json:"role" example:"Reader"`
-	AccessToken       string    `json:"-"`
+	// Auth
+	ID          uint   `json:"id,omitempty"`
+	GoogleSub   string `json:"-"`
+	AccessToken string `json:"-"`
+	// Data
+	Username          string `json:"username"`
+	Email             string `json:"email"`
+	FirstName         string `json:"firstname"`
+	LastName          string `json:"lastname"`
+	UserProfileEdited bool   `json:"userProfileEdited"`
+	Calories          uint   `json:"calories"`
+	Carbs             uint   `json:"carbs"`
+	Day               uint   `json:"day"`
+	Fats              uint   `json:"fats"`
+	Proteins          uint   `json:"proteins"`
+	RecipesAdded      string `json:"recipesAdded"` // List of recipes divided by character '^'
 }
 
 type Role string

@@ -32,7 +32,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/server.UserDTO"
                         }
                     },
                     "403": {
@@ -58,7 +58,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.User"
+                                "$ref": "#/definitions/server.UserDTO"
                             }
                         }
                     },
@@ -92,7 +92,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.User"
+                            "$ref": "#/definitions/server.UserDTO"
                         }
                     },
                     "404": {
@@ -137,7 +137,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.User"
+                            "$ref": "#/definitions/server.UserDTO"
                         }
                     },
                     "400": {
@@ -164,64 +164,87 @@
                 }
             }
         },
-        "models.User": {
+        "server.UpdateUserDTO": {
             "type": "object",
             "properties": {
-                "birthdate": {
-                    "type": "string",
-                    "example": "2006-01-02T15:04:05Z"
+                "calories": {
+                    "type": "integer"
                 },
-                "description": {
+                "carbs": {
+                    "type": "integer"
+                },
+                "day": {
+                    "type": "integer"
+                },
+                "email": {
                     "type": "string"
                 },
-                "gender": {
+                "fats": {
+                    "type": "integer"
+                },
+                "firstname": {
+                    "type": "string"
+                },
+                "lastname": {
+                    "type": "string"
+                },
+                "proteins": {
+                    "type": "integer"
+                },
+                "recipesAdded": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "userProfileEdited": {
+                    "type": "boolean"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "server.UserDTO": {
+            "type": "object",
+            "properties": {
+                "calories": {
+                    "type": "integer"
+                },
+                "carbs": {
+                    "type": "integer"
+                },
+                "day": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "fats": {
+                    "type": "integer"
+                },
+                "firstname": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
                 },
-                "name": {
+                "lastname": {
                     "type": "string"
                 },
-                "profilePictureUrl": {
-                    "type": "string"
+                "proteins": {
+                    "type": "integer"
                 },
-                "role": {
-                    "type": "string",
-                    "example": "Reader"
+                "recipesAdded": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
-                "shortDescription": {
-                    "type": "string"
-                }
-            }
-        },
-        "server.UpdateUserDTO": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "birthdate": {
-                    "type": "string",
-                    "example": "2006-01-02T15:04:05Z"
+                "userProfileEdited": {
+                    "type": "boolean"
                 },
-                "description": {
-                    "type": "string"
-                },
-                "gender": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "profilePictureUrl": {
-                    "type": "string"
-                },
-                "role": {
-                    "type": "string",
-                    "example": "Reader"
-                },
-                "shortDescription": {
+                "username": {
                     "type": "string"
                 }
             }

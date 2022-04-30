@@ -79,6 +79,21 @@ func (mr *MockUsersRepositoryMockRecorder) GetUser(arg0 interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockUsersRepository)(nil).GetUser), arg0)
 }
 
+// GetUserByAccessToken mocks base method.
+func (m *MockUsersRepository) GetUserByAccessToken(arg0 string) (*models.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserByAccessToken", arg0)
+	ret0, _ := ret[0].(*models.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserByAccessToken indicates an expected call of GetUserByAccessToken.
+func (mr *MockUsersRepositoryMockRecorder) GetUserByAccessToken(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByAccessToken", reflect.TypeOf((*MockUsersRepository)(nil).GetUserByAccessToken), arg0)
+}
+
 // GetUserByGoogleSub mocks base method.
 func (m *MockUsersRepository) GetUserByGoogleSub(arg0 string) (*models.User, error) {
 	m.ctrl.T.Helper()
