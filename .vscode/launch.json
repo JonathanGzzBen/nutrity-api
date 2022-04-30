@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug API V1",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/api/v1",
+      "preLaunchTask": "Update Swagger Docs V1"
+    },
+    {
+      "name": "Test API V1",
+      "type": "go",
+      "request": "launch",
+      "mode": "test",
+      "program": "${workspaceFolder}/api/v1/server"
+    }
+  ]
+}
