@@ -18,11 +18,3 @@ type User struct {
 	Proteins          uint   `json:"proteins"`
 	RecipesAdded      string `json:"recipesAdded"` // List of recipes divided by character '^'
 }
-
-type Role string
-
-const (
-	RoleAdministrator Role = "Administrator"
-	RoleWriter        Role = "Writer"
-	RoleReader        Role = "Reader"
-)
