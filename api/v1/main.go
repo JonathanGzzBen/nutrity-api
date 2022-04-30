@@ -44,8 +44,8 @@ func main() {
 	}
 	serverConfig := server.ServerConfig{
 		GoogleConfig: &oauth2.Config{
-			ClientID:     os.Getenv("ING_GOOGLE_CLIENT_ID"),
-			ClientSecret: os.Getenv("ING_GOOGLE_CLIENT_SECRET"),
+			ClientID:     os.Getenv("NUTRITY_GOOGLE_CLIENT_ID"),
+			ClientSecret: os.Getenv("NUTRITY_GOOGLE_CLIENT_SECRET"),
 			Endpoint:     endpoints.Google,
 			RedirectURL:  "http://127.0.0.1:8080/v1/auth/google-callback",
 			Scopes:       []string{"openid", "profile", "email"},
@@ -54,20 +54,17 @@ func main() {
 	}
 	// hostname is used by multiple controllers
 	// to make requests to authentication controller
-	hostname := os.Getenv("ING_HOSTNAME")
-	if len(hostname) == 0 {
-		panic("Environment variable ING_HOSTNAME missing")
+	hostname := os.Getenv("NUTRITY_HOSTNAME")
+	if hostname == "" {
+		panic("Environment variable NUTRITY_HOSTNAME missing")
 	}
 	serverConfig.Hostname = hostname
 	s := server.NewServer(serverConfig)
 
-	if os.Getenv("ING_ENVIRONMENT") == "development" {
-		port := os.Getenv("ING_PORT")
-		if len(port) == 0 {
-			panic("Environment variable ING_PORT missing")
-		}
-		s.Run(port)
+	port := os.Getenv("NUTRITY_PORT")
+	if port == "" {
+		s.Run("80")
 	} else {
-		s.Run()
+		s.Run(port)
 	}
 }
