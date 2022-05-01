@@ -93,13 +93,15 @@ func (s *Server) GoogleCallback(c *gin.Context) {
 		tokenResponse.AccessToken = u.AccessToken
 	}
 	if err != nil {
+		generatedToken := generateSecureToken(TokenLength)
 		u := &models.User{
 			GoogleSub:   uinfo.Sub,
-			AccessToken: generateSecureToken(TokenLength),
+			AccessToken: generatedToken,
 			Username:    uinfo.Name,
 			Email:       uinfo.Email,
 		}
 		s.UsersRepo.CreateUser(u)
+		tokenResponse.AccessToken = generatedToken
 	}
 
 	c.JSON(http.StatusOK, tokenResponse)
