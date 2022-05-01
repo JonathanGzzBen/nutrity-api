@@ -10,6 +10,7 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/endpoints"
 	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
@@ -38,15 +39,21 @@ import (
 // @scope.email Grant access to email
 func main() {
 	godotenv.Load(".env")
-	dbHost := os.Getenv("NUTRITY_DB_HOST")
-	dbUser := os.Getenv("NUTRITY_DB_USER")
-	dbPassword := os.Getenv("NUTRITY_DB_PASS")
-	dbPort := os.Getenv("NUTRITY_DB_PORT")
-	if dbHost == "" || dbUser == "" || dbPassword == "" || dbPort == "" {
-		panic("Missing database configuration environment variables. See .env.example")
+	var db *gorm.DB
+	var err error
+	if os.Getenv("NUTRITY_DB_POSTGRE") == "true" || os.Getenv("NUTRITY_DB_POSTGRE") == "True" || os.Getenv("NUTRITY_DB_POSTGRE") == "1" {
+		dbHost := os.Getenv("NUTRITY_DB_HOST")
+		dbUser := os.Getenv("NUTRITY_DB_USER")
+		dbPassword := os.Getenv("NUTRITY_DB_PASS")
+		dbPort := os.Getenv("NUTRITY_DB_PORT")
+		if dbHost == "" || dbUser == "" || dbPassword == "" || dbPort == "" {
+			panic("Missing database configuration environment variables. See .env.example")
+		}
+		dsn := "host=" + dbHost + " user=" + dbUser + " password=" + dbPassword + " port=" + dbPort + " dbname=nutrity sslmode=disable"
+		db, err = gorm.Open(postgres.Open(dsn))
+	} else {
+		db, err = gorm.Open(sqlite.Open("nutrity.db"))
 	}
-	dsn := "host=" + dbHost + " user=" + dbUser + " password=" + dbPassword + " port=" + dbPort + " dbname=nutrity sslmode=disable"
-	db, err := gorm.Open(postgres.Open(dsn))
 	if err != nil {
 		panic("Could not connect to database")
 	}
