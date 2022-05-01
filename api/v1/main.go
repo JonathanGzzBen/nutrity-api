@@ -9,7 +9,7 @@ import (
 	"github.com/joho/godotenv"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/endpoints"
-	"gorm.io/driver/sqlite"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -38,7 +38,15 @@ import (
 // @scope.email Grant access to email
 func main() {
 	godotenv.Load(".env")
-	db, err := gorm.Open(sqlite.Open("test.db"))
+	dbHost := os.Getenv("NUTRITY_DB_HOST")
+	dbUser := os.Getenv("NUTRITY_DB_USER")
+	dbPassword := os.Getenv("NUTRITY_DB_PASS")
+	dbPort := os.Getenv("NUTRITY_DB_PORT")
+	if dbHost == "" || dbUser == "" || dbPassword == "" || dbPort == "" {
+		panic("Missing database configuration environment variables. See .env.example")
+	}
+	dsn := "host=" + dbHost + " user=" + dbUser + " password=" + dbPassword + " port=" + dbPort + " dbname=nutrity sslmode=disable"
+	db, err := gorm.Open(postgres.Open(dsn))
 	if err != nil {
 		panic("Could not connect to database")
 	}
