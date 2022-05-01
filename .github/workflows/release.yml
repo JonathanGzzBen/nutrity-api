@@ -23,25 +23,10 @@ jobs:
         with:
           version: latest
           working-directory: api/v1
-  test:
-    name: Run tests
-    runs-on: "ubuntu-latest"
-    steps:
-      - uses: actions/checkout@v2.3.4
 
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.16
-
-      - name: Run Go Test
-        run: |
-          cd api/v1
-          go test -v -cover ./...
   build:
     name: Build
     runs-on: 'ubuntu-latest'
-    needs: test
     steps:
       - name: Checkout code
         uses: actions/checkout@v2.3.4

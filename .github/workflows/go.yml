@@ -36,8 +36,3 @@ jobs:
 
     - name: Build
       run: ./scripts/build_api_v1.sh
-
-    - name: Test
-      run: |
-        cd api/v1
-        go test -v ./...
