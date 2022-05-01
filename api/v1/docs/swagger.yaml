@@ -9,122 +9,61 @@ definitions:
         example: status bad request
         type: string
     type: object
-  models.Article:
-    properties:
-      body:
-        type: string
-      category:
-        $ref: '#/definitions/models.Category'
-      categoryId:
-        type: integer
-      createdAt:
-        type: string
-      id:
-        type: integer
-      imageUrl:
-        type: string
-      tags:
-        description: Tags is a comma separated string of tags
-        type: string
-      title:
-        type: string
-      updtedAt:
-        type: string
-      user:
-        $ref: '#/definitions/models.User'
-      userId:
-        type: integer
-    type: object
-  models.Category:
-    properties:
-      id:
-        type: integer
-      imageUrl:
-        type: string
-      name:
-        type: string
-    type: object
-  models.User:
-    properties:
-      birthdate:
-        example: "2006-01-02T15:04:05Z"
-        type: string
-      description:
-        type: string
-      gender:
-        type: string
-      id:
-        type: integer
-      name:
-        type: string
-      profilePictureUrl:
-        type: string
-      role:
-        example: Reader
-        type: string
-      shortDescription:
-        type: string
-    type: object
-  server.CreateArticleDTO:
-    properties:
-      body:
-        type: string
-      categoryId:
-        type: integer
-      imageUrl:
-        type: string
-      tags:
-        type: string
-      title:
-        type: string
-    type: object
-  server.CreateCategoryDTO:
-    properties:
-      imageUrl:
-        type: string
-      name:
-        type: string
-    type: object
-  server.UpdateArticleDTO:
-    properties:
-      body:
-        type: string
-      categoryId:
-        type: integer
-      imageUrl:
-        type: string
-      tags:
-        type: string
-      title:
-        type: string
-    type: object
-  server.UpdateCategoryDTO:
-    properties:
-      imageUrl:
-        type: string
-      name:
-        type: string
-    type: object
   server.UpdateUserDTO:
     properties:
-      birthdate:
-        example: "2006-01-02T15:04:05Z"
+      calories:
+        type: integer
+      carbs:
+        type: integer
+      day:
+        type: integer
+      email:
         type: string
-      description:
+      fats:
+        type: integer
+      firstname:
         type: string
-      gender:
+      lastname:
         type: string
-      name:
+      proteins:
+        type: integer
+      recipesAdded:
+        items:
+          type: string
+        type: array
+      userProfileEdited:
+        type: boolean
+      username:
         type: string
-      profilePictureUrl:
+    type: object
+  server.UserDTO:
+    properties:
+      calories:
+        type: integer
+      carbs:
+        type: integer
+      day:
+        type: integer
+      email:
         type: string
-      role:
-        example: Reader
+      fats:
+        type: integer
+      firstname:
         type: string
-      shortDescription:
+      id:
+        type: integer
+      lastname:
         type: string
-    required:
-    - name
+      proteins:
+        type: integer
+      recipesAdded:
+        items:
+          type: string
+        type: array
+      userProfileEdited:
+        type: boolean
+      username:
+        type: string
     type: object
 host: localhost:8080
 info:
@@ -139,154 +78,6 @@ info:
   title: Ingenialists API V1
   version: v1.0.0
 paths:
-  /articles:
-    get:
-      description: Get all registered articles.
-      operationId: GetAllArticles
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.Article'
-            type: array
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.APIError'
-      summary: Get all articles
-      tags:
-      - articles
-    post:
-      description: Register a new article.
-      operationId: CreateArticle
-      parameters:
-      - description: Article
-        in: body
-        name: article
-        required: true
-        schema:
-          $ref: '#/definitions/server.CreateArticleDTO'
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Category'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.APIError'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.APIError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.APIError'
-      security:
-      - AccessToken: []
-      summary: Create article
-      tags:
-      - articles
-  /articles/{id}:
-    delete:
-      description: Delete article with matching ID.
-      operationId: DeleteArticle
-      parameters:
-      - description: Article ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "204":
-          description: No Content
-          schema:
-            type: string
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.APIError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.APIError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.APIError'
-      security:
-      - AccessToken: []
-      summary: Delete article
-      tags:
-      - articles
-    get:
-      description: Get article with matching ID.
-      operationId: GetArticle
-      parameters:
-      - description: Article ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Article'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.APIError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.APIError'
-      summary: Get article
-      tags:
-      - articles
-    put:
-      description: Updates a registered article.
-      operationId: UpdateArticle
-      parameters:
-      - description: Article ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Article
-        in: body
-        name: article
-        required: true
-        schema:
-          $ref: '#/definitions/server.UpdateArticleDTO'
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Article'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.APIError'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.APIError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.APIError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.APIError'
-      security:
-      - AccessToken: []
-      summary: Update article
-      tags:
-      - articles
   /auth:
     get:
       operationId: GetCurrentUser
@@ -294,7 +85,7 @@ paths:
         "200":
           description: OK
           schema:
-            type: string
+            $ref: '#/definitions/server.UserDTO'
         "403":
           description: Forbidden
           schema:
@@ -303,154 +94,6 @@ paths:
       - AccessToken: []
       tags:
       - auth
-  /categories:
-    get:
-      description: Get all registered categories.
-      operationId: GetAllCategories
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.Category'
-            type: array
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.APIError'
-      summary: Get all categories
-      tags:
-      - categories
-    post:
-      description: Register a new category.
-      operationId: CreateCategory
-      parameters:
-      - description: Category
-        in: body
-        name: category
-        required: true
-        schema:
-          $ref: '#/definitions/server.CreateCategoryDTO'
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Category'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.APIError'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.APIError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.APIError'
-      security:
-      - AccessToken: []
-      summary: Create category
-      tags:
-      - categories
-  /categories/{id}:
-    delete:
-      description: Delete category with matching ID.
-      operationId: DeleteCategory
-      parameters:
-      - description: Category ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "204":
-          description: No Content
-          schema:
-            type: string
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.APIError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.APIError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.APIError'
-      security:
-      - AccessToken: []
-      summary: Delete category
-      tags:
-      - categories
-    get:
-      description: Get category with matching ID.
-      operationId: GetCategory
-      parameters:
-      - description: Category ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Category'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.APIError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.APIError'
-      summary: Get category
-      tags:
-      - categories
-    put:
-      description: Updates a registered category.
-      operationId: UpdateCategory
-      parameters:
-      - description: Category ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Category
-        in: body
-        name: category
-        required: true
-        schema:
-          $ref: '#/definitions/server.UpdateCategoryDTO'
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Category'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.APIError'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/models.APIError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.APIError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.APIError'
-      security:
-      - AccessToken: []
-      summary: Update category
-      tags:
-      - categories
   /users:
     get:
       description: Get all registered users.
@@ -460,7 +103,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.User'
+              $ref: '#/definitions/server.UserDTO'
             type: array
         "500":
           description: Internal Server Error
@@ -483,7 +126,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.User'
+            $ref: '#/definitions/server.UserDTO'
         "404":
           description: Not Found
           schema:
@@ -510,7 +153,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.User'
+            $ref: '#/definitions/server.UserDTO'
         "400":
           description: Bad Request
           schema:

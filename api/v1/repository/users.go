@@ -1,14 +1,25 @@
 package repository
 
 import (
-	"github.com/JonathanGzzBen/ingenialists/api/v1/models"
+	"errors"
+
+	"github.com/JonathanGzzBen/nutrity-api/api/v1/models"
 	"gorm.io/gorm"
+)
+
+var (
+	ErrCouldNotRetrieve = errors.New("could not retrieve records")
+	ErrNotFound         = errors.New("record not found")
+	ErrCouldNotCreate   = errors.New("could not insert record")
+	ErrCouldNotUpdate   = errors.New("could not update record")
+	ErrCouldNotDelete   = errors.New("could not delete record")
 )
 
 type UsersRepository interface {
 	GetAllUsers() ([]models.User, error)
 	GetUser(uint) (*models.User, error)
 	GetUserByGoogleSub(string) (*models.User, error)
+	GetUserByAccessToken(string) (*models.User, error)
 	CreateUser(*models.User) (*models.User, error)
 	UpdateUser(*models.User) (*models.User, error)
 }
@@ -49,7 +60,19 @@ func (r *UsersGormRepository) GetUserByGoogleSub(sub string) (*models.User, erro
 	var user *models.User
 	res := r.db.Where("google_sub = ?", sub).First(&user)
 	if res.Error == gorm.ErrRecordNotFound {
+		return nil, ErrNotFound
+	}
+	if res.Error != nil {
 		return nil, ErrCouldNotRetrieve
+	}
+	return user, nil
+}
+
+func (r *UsersGormRepository) GetUserByAccessToken(at string) (*models.User, error) {
+	var user *models.User
+	res := r.db.Where("access_token = ?", at).First(&user)
+	if res.Error == gorm.ErrRecordNotFound {
+		return nil, ErrNotFound
 	}
 	if res.Error != nil {
 		return nil, ErrCouldNotRetrieve

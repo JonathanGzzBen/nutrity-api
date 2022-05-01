@@ -3,21 +3,81 @@ package server
 import (
 	"net/http"
 	"strconv"
-	"time"
+	"strings"
 
-	"github.com/JonathanGzzBen/ingenialists/api/v1/models"
-	"github.com/JonathanGzzBen/ingenialists/api/v1/repository"
+	"github.com/JonathanGzzBen/nutrity-api/api/v1/models"
+	"github.com/JonathanGzzBen/nutrity-api/api/v1/repository"
 	"github.com/gin-gonic/gin"
 )
 
 type UpdateUserDTO struct {
-	Name              string      `json:"name" binding:"required"`
-	Birthdate         time.Time   `json:"birthdate" example:"2006-01-02T15:04:05Z"`
-	Gender            string      `json:"gender"`
-	ProfilePictureURL string      `json:"profilePictureUrl"`
-	Description       string      `json:"description"`
-	ShortDescription  string      `json:"shortDescription"`
-	Role              models.Role `json:"role" example:"Reader"`
+	Username          string   `json:"username"`
+	Email             string   `json:"email"`
+	FirstName         string   `json:"firstname"`
+	LastName          string   `json:"lastname"`
+	UserProfileEdited bool     `json:"userProfileEdited"`
+	Calories          uint     `json:"calories"`
+	Carbs             uint     `json:"carbs"`
+	Day               uint     `json:"day"`
+	Fats              uint     `json:"fats"`
+	Proteins          uint     `json:"proteins"`
+	RecipesAdded      []string `json:"recipesAdded"`
+}
+
+type UserDTO struct {
+	ID                uint     `json:"id,omitempty"`
+	Username          string   `json:"username"`
+	Email             string   `json:"email"`
+	FirstName         string   `json:"firstname"`
+	LastName          string   `json:"lastname"`
+	UserProfileEdited bool     `json:"userProfileEdited"`
+	Calories          uint     `json:"calories"`
+	Carbs             uint     `json:"carbs"`
+	Day               uint     `json:"day"`
+	Fats              uint     `json:"fats"`
+	Proteins          uint     `json:"proteins"`
+	RecipesAdded      []string `json:"recipesAdded"`
+}
+
+func userDTOFromUser(u *models.User) UserDTO {
+	return UserDTO{
+		ID:                u.ID,
+		Username:          u.Username,
+		Email:             u.Email,
+		FirstName:         u.FirstName,
+		LastName:          u.LastName,
+		UserProfileEdited: u.UserProfileEdited,
+		Calories:          u.Calories,
+		Carbs:             u.Carbs,
+		Day:               u.Day,
+		Fats:              u.Fats,
+		Proteins:          u.Proteins,
+		RecipesAdded:      strings.Split(u.RecipesAdded, "^"),
+	}
+}
+
+func userFromUserDTO(uDTO *UserDTO) models.User {
+	// Convert array to single string separating elements using character '^'
+	recipesAddedString := ""
+	for _, r := range uDTO.RecipesAdded {
+		recipesAddedString += r + "^"
+	}
+	recipesAddedString = recipesAddedString[:len(recipesAddedString)-1] // Remove trailing '^'
+
+	return models.User{
+		ID:                uDTO.ID,
+		Username:          uDTO.Username,
+		Email:             uDTO.Email,
+		FirstName:         uDTO.FirstName,
+		LastName:          uDTO.LastName,
+		UserProfileEdited: uDTO.UserProfileEdited,
+		Calories:          uDTO.Calories,
+		Carbs:             uDTO.Carbs,
+		Day:               uDTO.Day,
+		Fats:              uDTO.Fats,
+		Proteins:          uDTO.Proteins,
+		RecipesAdded:      recipesAddedString,
+	}
 }
 
 // GetAllUsers is the handler for GET requests to /users
@@ -25,11 +85,15 @@ type UpdateUserDTO struct {
 // 	@Summary Get all users
 // 	@Description Get all registered users.
 // 	@Tags users
-// 	@Success 200 {array} models.User
+// 	@Success 200 {array} UserDTO
 // 	@Failure 500 {object} models.APIError
 // 	@Router /users [get]
 func (s *Server) GetAllUsers(c *gin.Context) {
 	users, err := s.UsersRepo.GetAllUsers()
+	userDTOs := make([]UserDTO, len(users))
+	for _, u := range users {
+		userDTOs = append(userDTOs, userDTOFromUser(&u))
+	}
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.APIError{Code: http.StatusInternalServerError, Message: "could not connect to database"})
 		return
@@ -43,7 +107,7 @@ func (s *Server) GetAllUsers(c *gin.Context) {
 // 	@Description Get user with matching ID.
 // 	@Tags users
 // 	@Param id path int true "User ID"
-// 	@Success 200 {object} models.User
+// 	@Success 200 {object} UserDTO
 // 	@Failure 404 {object} models.APIError
 // 	@Router /users/{id} [get]
 func (s *Server) GetUser(c *gin.Context) {
@@ -61,7 +125,7 @@ func (s *Server) GetUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.APIError{Code: http.StatusBadRequest, Message: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, userDTOFromUser(user))
 }
 
 // UpdateUser is the handler for PUT requests to /users/:id
@@ -72,7 +136,7 @@ func (s *Server) GetUser(c *gin.Context) {
 // 	@Security AccessToken
 // 	@Param id path int true "User ID"
 // 	@Param user body UpdateUserDTO true "User"
-// 	@Success 200 {object} models.User
+// 	@Success 200 {object} UserDTO
 // 	@Failure 400 {object} models.APIError
 // 	@Router /users/{id} [put]
 func (s *Server) UpdateUser(c *gin.Context) {
@@ -87,7 +151,7 @@ func (s *Server) UpdateUser(c *gin.Context) {
 		c.JSON(http.StatusForbidden, models.APIError{Code: http.StatusForbidden, Message: "id is not a valid"})
 		return
 	}
-	if au.ID != uint(id) && au.Role != models.RoleAdministrator {
+	if au.ID != uint(id) {
 		c.JSON(http.StatusForbidden, models.APIError{Code: http.StatusForbidden, Message: "id does not match authenticated user"})
 		return
 	}
@@ -96,39 +160,37 @@ func (s *Server) UpdateUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.APIError{Code: http.StatusNotFound, Message: "invalid update user: " + err.Error()})
 		return
 	}
-	// If administrator is updating other user
-	if au.Role == models.RoleAdministrator && uint(id) != au.ID {
-		u, err := s.UsersRepo.GetUser(uint(id))
-		if err != nil {
-			c.JSON(http.StatusBadRequest, models.APIError{Code: http.StatusNotFound, Message: err.Error()})
-			return
-		}
-		// Administrators can only change Role of other users
-		u.Role = uu.Role
-		u, err = s.UsersRepo.UpdateUser(u)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, models.APIError{Code: http.StatusNotFound, Message: "could not update user: " + err.Error()})
-			return
-		}
-		c.JSON(http.StatusOK, u)
-		return
-	}
+
 	// User is updating his own information
 	u, err := s.UsersRepo.GetUser(uint(id))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.APIError{Code: http.StatusNotFound, Message: "not registered user"})
 		return
 	}
-	u.Name = uu.Name
-	u.Birthdate = uu.Birthdate
-	u.Gender = uu.Gender
-	u.ProfilePictureURL = uu.ProfilePictureURL
-	u.Description = uu.Description
-	u.ShortDescription = uu.ShortDescription
+
+	// Convert array to single string separating elements using character '^'
+	recipesAddedString := ""
+	for _, r := range uu.RecipesAdded {
+		recipesAddedString += r + "^"
+	}
+	recipesAddedString = recipesAddedString[:len(recipesAddedString)-1] // Remove trailing '^'
+
+	u.Username = uu.Username
+	u.Email = uu.Email
+	u.FirstName = uu.FirstName
+	u.LastName = uu.LastName
+	u.UserProfileEdited = uu.UserProfileEdited
+	u.Calories = uu.Calories
+	u.Carbs = uu.Carbs
+	u.Day = uu.Day
+	u.Fats = uu.Fats
+	u.Proteins = uu.Proteins
+	u.RecipesAdded = recipesAddedString
+
 	u, err = s.UsersRepo.UpdateUser(u)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.APIError{Code: http.StatusNotFound, Message: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, u)
+	c.JSON(http.StatusOK, userDTOFromUser(u))
 }

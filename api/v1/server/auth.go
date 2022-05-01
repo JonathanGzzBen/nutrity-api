@@ -2,18 +2,21 @@ package server
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"net/http"
 	"net/url"
 
-	"github.com/JonathanGzzBen/ingenialists/api/v1/models"
+	"github.com/JonathanGzzBen/nutrity-api/api/v1/models"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
 )
 
 var (
-	state             = "ingenialists"
+	state             = "nutrity-api"
 	googleUserInfoURL = "https://www.googleapis.com/oauth2/v3/userinfo"
 	AccessTokenName   = "AccessToken"
+	TokenLength       = 40
 )
 
 type IOauthConfig interface {
@@ -21,10 +24,23 @@ type IOauthConfig interface {
 	Exchange(context.Context, string, ...oauth2.AuthCodeOption) (*oauth2.Token, error)
 }
 
+func generateSecureToken(length int) string {
+	b := make([]byte, length)
+	if _, err := rand.Read(b); err != nil {
+		return ""
+	}
+	return hex.EncodeToString(b)
+}
+
+type tokenResponse struct {
+	AccessToken string `json:"AccessToken"`
+	TokenType   string `json:"TokenType"`
+}
+
 // CurrentUser is the handler for GET requests to /auth
 // 	@ID GetCurrentUser
 // 	@Tags auth
-// 	@Success 200 {object} string
+// 	@Success 200 {object} UserDTO
 // 	@Failure 403 {object} models.APIError
 // 	@Security AccessToken
 // 	@Router /auth [get]
@@ -35,7 +51,7 @@ func (s *Server) GetCurrentUser(c *gin.Context) {
 		c.JSON(http.StatusForbidden, models.APIError{Code: http.StatusForbidden, Message: "invalid access token"})
 		return
 	}
-	c.JSON(http.StatusOK, u)
+	c.JSON(http.StatusOK, userDTOFromUser(u))
 }
 
 // LoginGoogle is the handler for GET requests to /auth/google-login
@@ -69,37 +85,30 @@ func (s *Server) GoogleCallback(c *gin.Context) {
 		return
 	}
 
-	_, err = s.UsersRepo.GetUserByGoogleSub(uinfo.Sub)
+	u, err := s.UsersRepo.GetUserByGoogleSub(uinfo.Sub)
+	tokenResponse := tokenResponse{
+		TokenType: "Bearer",
+	}
+	if u != nil {
+		tokenResponse.AccessToken = u.AccessToken
+	}
 	if err != nil {
+		generatedToken := generateSecureToken(TokenLength)
 		u := &models.User{
-			GoogleSub:         uinfo.Sub,
-			ProfilePictureURL: uinfo.Picture,
-			Name:              uinfo.Name,
+			GoogleSub:   uinfo.Sub,
+			AccessToken: generatedToken,
+			Username:    uinfo.Name,
+			Email:       uinfo.Email,
 		}
 		s.UsersRepo.CreateUser(u)
+		tokenResponse.AccessToken = generatedToken
 	}
 
-	c.JSON(http.StatusOK, token)
+	c.JSON(http.StatusOK, tokenResponse)
 }
 
 func (s *Server) userByAccessToken(at string) (*models.User, error) {
-	ui, err := s.googleClient.userInfoByAccessToken(at)
-	if err != nil {
-		return nil, err
-	}
-	if s.development {
-		var role models.Role
-		switch at {
-		case "Administrator":
-			role = models.RoleAdministrator
-		case "Writer":
-			role = models.RoleWriter
-		default:
-			role = models.RoleReader
-		}
-		return &models.User{ID: 1, GoogleSub: ui.Sub, Name: ui.Name, Role: role}, nil
-	}
-	u, err := s.UsersRepo.GetUserByGoogleSub(ui.Sub)
+	u, err := s.UsersRepo.GetUserByAccessToken(at)
 	if err != nil {
 		return nil, err
 	}
