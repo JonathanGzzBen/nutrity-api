@@ -3,7 +3,7 @@ package models
 type User struct {
 	// Auth
 	ID          uint   `json:"id,omitempty"`
-	GoogleSub   string `json:"-"`
+	GoogleToken string `json:"-"`
 	AccessToken string `json:"-"`
 	// Data
 	Username          string `json:"username"`

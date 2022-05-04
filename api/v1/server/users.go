@@ -141,7 +141,7 @@ func (s *Server) GetUser(c *gin.Context) {
 // 	@Router /users/{id} [put]
 func (s *Server) UpdateUser(c *gin.Context) {
 	at := c.GetHeader(AccessTokenName)
-	au, err := s.userByAccessToken(at)
+	au, err := s.UsersRepo.GetUserByAccessToken(at)
 	if err != nil {
 		c.JSON(http.StatusForbidden, models.APIError{Code: http.StatusForbidden, Message: "not authenticated: " + err.Error()})
 		return

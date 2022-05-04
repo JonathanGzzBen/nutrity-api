@@ -49,6 +49,37 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "tags": [
+                    "auth"
+                ],
+                "operationId": "RegisterUser",
+                "parameters": [
+                    {
+                        "description": "User",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/server.RegisterUserDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/server.tokenResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.APIError"
+                        }
+                    }
+                }
             }
         },
         "/users": {
@@ -171,6 +202,20 @@ const docTemplate = `{
                 }
             }
         },
+        "server.RegisterUserDTO": {
+            "type": "object",
+            "properties": {
+                "Email": {
+                    "type": "string"
+                },
+                "GoogleToken": {
+                    "type": "string"
+                },
+                "Username": {
+                    "type": "string"
+                }
+            }
+        },
         "server.UpdateUserDTO": {
             "type": "object",
             "properties": {
@@ -255,6 +300,17 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "server.tokenResponse": {
+            "type": "object",
+            "properties": {
+                "AccessToken": {
+                    "type": "string"
+                },
+                "TokenType": {
+                    "type": "string"
+                }
+            }
         }
     },
     "securityDefinitions": {
@@ -262,17 +318,6 @@ const docTemplate = `{
             "type": "apiKey",
             "name": "AccessToken",
             "in": "header"
-        },
-        "OAuth2AccessCode": {
-            "type": "oauth2",
-            "flow": "accessCode",
-            "authorizationUrl": "/v1/auth/google-login",
-            "tokenUrl": "/v1/auth/google-callback",
-            "scopes": {
-                "email": " Grant access to email",
-                "openid": " Allow identifying account",
-                "profile": " Grant access to profile"
-            }
         }
     }
 }`

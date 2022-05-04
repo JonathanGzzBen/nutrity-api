@@ -8,30 +8,21 @@ import (
 )
 
 type Server struct {
-	googleClient IGoogleClient
-	googleConfig IOauthConfig
-	development  bool
-	Router       *gin.Engine
-	UsersRepo    repository.UsersRepository
+	development bool
+	Router      *gin.Engine
+	UsersRepo   repository.UsersRepository
 }
 
 type ServerConfig struct {
-	GoogleConfig IOauthConfig
-	Hostname     string
-	Development  bool
-	UsersRepo    repository.UsersRepository
+	Hostname    string
+	Development bool
+	UsersRepo   repository.UsersRepository
 }
 
 func NewServer(sc ServerConfig) *Server {
 	server := &Server{
-		googleConfig: sc.GoogleConfig,
-		development:  sc.Development,
-		UsersRepo:    sc.UsersRepo,
-	}
-	if sc.Development {
-		server.googleClient = &GoogleClientMock{}
-	} else {
-		server.googleClient = &GoogleClient{}
+		development: sc.Development,
+		UsersRepo:   sc.UsersRepo,
 	}
 
 	router := gin.Default()
@@ -46,11 +37,7 @@ func NewServer(sc ServerConfig) *Server {
 		ar := v1.Group("/auth")
 		{
 			ar.GET("/", server.GetCurrentUser)
-			ar.GET("/google-login", server.LoginGoogle)
-			ar.GET("/google-callback", server.GoogleCallback)
-			if sc.Development {
-				ar.GET("/dev-authorize", server.devOAuthAuthorize)
-			}
+			ar.POST("/", server.RegisterUser)
 		}
 	}
 

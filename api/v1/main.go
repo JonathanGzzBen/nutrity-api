@@ -7,8 +7,6 @@ import (
 	"github.com/JonathanGzzBen/nutrity-api/api/v1/repository"
 	"github.com/JonathanGzzBen/nutrity-api/api/v1/server"
 	"github.com/joho/godotenv"
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/endpoints"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -30,13 +28,6 @@ import (
 // @securityDefinitions.apikey AccessToken
 // @in header
 // @name AccessToken
-//
-// @securitydefinitions.oauth2.accessCode OAuth2AccessCode
-// @tokenUrl /v1/auth/google-callback
-// @authorizationUrl /v1/auth/google-login
-// @scope.openid Allow identifying account
-// @scope.profile Grant access to profile
-// @scope.email Grant access to email
 func main() {
 	godotenv.Load(".env")
 	var db *gorm.DB
@@ -58,13 +49,6 @@ func main() {
 		panic("Could not connect to database")
 	}
 	serverConfig := server.ServerConfig{
-		GoogleConfig: &oauth2.Config{
-			ClientID:     os.Getenv("NUTRITY_GOOGLE_CLIENT_ID"),
-			ClientSecret: os.Getenv("NUTRITY_GOOGLE_CLIENT_SECRET"),
-			Endpoint:     endpoints.Google,
-			RedirectURL:  "http://127.0.0.1:8080/v1/auth/google-callback",
-			Scopes:       []string{"openid", "profile", "email"},
-		},
 		UsersRepo: repository.NewUsersGormRepository(db),
 	}
 	// hostname is used by multiple controllers
@@ -78,7 +62,7 @@ func main() {
 
 	port := os.Getenv("NUTRITY_PORT")
 	if port == "" {
-		s.Run("80")
+		s.Run(":80")
 	} else {
 		s.Run(port)
 	}

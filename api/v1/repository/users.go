@@ -18,7 +18,7 @@ var (
 type UsersRepository interface {
 	GetAllUsers() ([]models.User, error)
 	GetUser(uint) (*models.User, error)
-	GetUserByGoogleSub(string) (*models.User, error)
+	GetUserByGoogleToken(string) (*models.User, error)
 	GetUserByAccessToken(string) (*models.User, error)
 	CreateUser(*models.User) (*models.User, error)
 	UpdateUser(*models.User) (*models.User, error)
@@ -56,9 +56,9 @@ func (r *UsersGormRepository) GetUser(id uint) (*models.User, error) {
 	return user, nil
 }
 
-func (r *UsersGormRepository) GetUserByGoogleSub(sub string) (*models.User, error) {
+func (r *UsersGormRepository) GetUserByAccessToken(at string) (*models.User, error) {
 	var user *models.User
-	res := r.db.Where("google_sub = ?", sub).First(&user)
+	res := r.db.Where("access_token = ?", at).First(&user)
 	if res.Error == gorm.ErrRecordNotFound {
 		return nil, ErrNotFound
 	}
@@ -68,9 +68,9 @@ func (r *UsersGormRepository) GetUserByGoogleSub(sub string) (*models.User, erro
 	return user, nil
 }
 
-func (r *UsersGormRepository) GetUserByAccessToken(at string) (*models.User, error) {
+func (r *UsersGormRepository) GetUserByGoogleToken(at string) (*models.User, error) {
 	var user *models.User
-	res := r.db.Where("access_token = ?", at).First(&user)
+	res := r.db.Where("google_token = ?", at).First(&user)
 	if res.Error == gorm.ErrRecordNotFound {
 		return nil, ErrNotFound
 	}

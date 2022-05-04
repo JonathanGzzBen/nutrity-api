@@ -9,6 +9,15 @@ definitions:
         example: status bad request
         type: string
     type: object
+  server.RegisterUserDTO:
+    properties:
+      Email:
+        type: string
+      GoogleToken:
+        type: string
+      Username:
+        type: string
+    type: object
   server.UpdateUserDTO:
     properties:
       calories:
@@ -65,6 +74,13 @@ definitions:
       username:
         type: string
     type: object
+  server.tokenResponse:
+    properties:
+      AccessToken:
+        type: string
+      TokenType:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -92,6 +108,26 @@ paths:
             $ref: '#/definitions/models.APIError'
       security:
       - AccessToken: []
+      tags:
+      - auth
+    post:
+      operationId: RegisterUser
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/server.RegisterUserDTO'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/server.tokenResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.APIError'
       tags:
       - auth
   /users:
@@ -168,13 +204,4 @@ securityDefinitions:
     in: header
     name: AccessToken
     type: apiKey
-  OAuth2AccessCode:
-    authorizationUrl: /v1/auth/google-login
-    flow: accessCode
-    scopes:
-      email: ' Grant access to email'
-      openid: ' Allow identifying account'
-      profile: ' Grant access to profile'
-    tokenUrl: /v1/auth/google-callback
-    type: oauth2
 swagger: "2.0"
